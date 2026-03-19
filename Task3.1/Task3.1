@@ -24,7 +24,7 @@ bool tempAlertSent = false;
 
 // Timing variables
 unsigned long previousReadTime = 0;
-const unsigned long readInterval = 5000; // 5 seconds
+const unsigned long readInterval = 5000; 
 
 void setup() {
   Serial.begin(9600);
@@ -43,7 +43,7 @@ void setup() {
 void loop() {
   unsigned long currentTime = millis();
 
-  // Check if it's time to read sensors
+  // Check if is the time to read sensors
   if (currentTime - previousReadTime >= readInterval) {
     previousReadTime = currentTime;
 
