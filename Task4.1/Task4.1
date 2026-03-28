@@ -1,0 +1,93 @@
+#include <Wire.h>
+#include <BH1750.h>
+
+BH1750 lightMeter;
+
+// Pins
+const int PIR_PIN = 2;
+const int SWITCH_PIN = 3;
+const int LED1 = 4;
+const int LED2 = 5;
+
+// Interrupt flags
+volatile bool pirFlag = false;
+volatile bool switchFlag = false;
+
+// States
+bool motionDetected = false;
+bool switchOn = false;
+bool ledState = false;
+
+// Light threshold
+const uint16_t DARK_THRESHOLD = 50;
+
+// Motion timing
+unsigned long lastMotionTime = 0;
+const unsigned long MOTION_TIMEOUT = 3000; 
+
+
+unsigned long lastSwitchTime = 0;
+const unsigned long SWITCH_DEBOUNCE = 200;
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
+  pinMode(PIR_PIN, INPUT);
+  pinMode(SWITCH_PIN, INPUT_PULLUP);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+
+  Wire.begin();
+  if (!lightMeter.begin()) Serial.println("BH1750 not found!");
+  else Serial.println("BH1750 OK");
+
+  attachInterrupt(digitalPinToInterrupt(PIR_PIN), pirISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(SWITCH_PIN), switchISR, CHANGE);
+}
+
+void loop() {
+  uint16_t lux = lightMeter.readLightLevel();
+  // Motion Detection
+  motionDetected = (digitalRead(PIR_PIN) == HIGH);
+  if (motionDetected) lastMotionTime = millis();
+
+  if (millis() - lastMotionTime < MOTION_TIMEOUT) {
+    motionDetected = true;
+  } else {
+    motionDetected = false;
+  }
+  //Control switch
+  if (switchFlag) {
+    switchFlag = false;
+    unsigned long now = millis();
+
+    if (now - lastSwitchTime > SWITCH_DEBOUNCE) {
+      switchOn = (digitalRead(SWITCH_PIN) == LOW);
+      Serial.print("Switch: ");
+      Serial.println(switchOn ? "ON" : "OFF");
+      lastSwitchTime = now;
+    }
+  }
+  //Control LEDs
+  ledState = (motionDetected && switchOn && lux < DARK_THRESHOLD);
+
+  digitalWrite(LED1, ledState ? HIGH : LOW);
+  digitalWrite(LED2, ledState ? HIGH : LOW);
+
+  Serial.print("Lux: "); Serial.print(lux);
+  Serial.print(" | Motion: "); Serial.print(motionDetected);
+  Serial.print(" | Switch: "); Serial.print(switchOn);
+  Serial.print(" | LED: "); Serial.println(ledState ? "ON" : "OFF");
+
+  delay(200);
+}
+
+// Interrupt
+void pirISR() {
+  pirFlag = true;
+}
+
+void switchISR() {
+  switchFlag = true;
+}
