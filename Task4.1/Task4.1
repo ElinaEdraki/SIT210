@@ -19,7 +19,7 @@ bool switchOn = false;
 bool ledState = false;
 
 // Light threshold
-const uint16_t DARK_THRESHOLD = 50;
+const uint16_t DARK_THRESHOLD = 500;
 
 // Motion timing
 unsigned long lastMotionTime = 0;
@@ -48,7 +48,7 @@ void setup() {
 
 void loop() {
   uint16_t lux = lightMeter.readLightLevel();
-  // Motion Detection
+
   motionDetected = (digitalRead(PIR_PIN) == HIGH);
   if (motionDetected) lastMotionTime = millis();
 
@@ -57,7 +57,7 @@ void loop() {
   } else {
     motionDetected = false;
   }
-  //Control switch
+
   if (switchFlag) {
     switchFlag = false;
     unsigned long now = millis();
@@ -69,8 +69,9 @@ void loop() {
       lastSwitchTime = now;
     }
   }
-  //Control LEDs
-  ledState = (motionDetected && switchOn && lux < DARK_THRESHOLD);
+
+  bool isDark = (lux < DARK_THRESHOLD);
+  ledState = ( (motionDetected && isDark) || switchOn );
 
   digitalWrite(LED1, ledState ? HIGH : LOW);
   digitalWrite(LED2, ledState ? HIGH : LOW);
@@ -83,7 +84,6 @@ void loop() {
   delay(200);
 }
 
-// Interrupt
 void pirISR() {
   pirFlag = true;
 }
