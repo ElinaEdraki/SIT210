@@ -1,0 +1,51 @@
+import tkinter as tk
+from gpiozero import PWMLED, LED
+
+living_room = PWMLED(18)
+bathroom = LED(27)
+closet = LED(22)
+
+def update_leds():
+    living_room.value = 0
+    bathroom.off()
+    closet.off()
+    
+    selection = room_var.get()
+    if selection == 1:
+        living_room.value = brightness_var.get()
+    elif selection == 2:
+        bathroom.on()
+    elif selection == 3:
+        closet.on()
+def update_brightness(val):
+    if room_var.get() == 1:
+        living_room.value = brightness_var.get()
+
+def exit_app():
+    living_room.value = 0
+    bathroom.off()
+    closet.off()
+    root.destroy()
+
+# Create the window
+root = tk.Tk()
+root.title("Linda's Light Controller")
+root.geometry("320x280")
+
+# Title label
+tk.Label(root, text="Select a room to turn on the light", font=("Arial", 11)).p>
+
+# Radio buttons
+room_var = tk.IntVar()
+tk.Radiobutton(root, text="Living Room", variable=room_var, value=1, command=up>
+tk.Radiobutton(root, text="Bathroom",    variable=room_var, value=2, command=up>
+tk.Radiobutton(root, text="Closet",      variable=room_var, value=3, command=up>
+
+# Brightness slider (only affects living room)
+tk.Label(root, text="Living Room Brightness", font=("Arial", 10)).pack(pady=(15>
+brightness_var = tk.DoubleVar(value=1.0)
+slider = tk.Scale(root, variable=brightness_var, from_=0, to=1, resolution=0.01,
+                  orient="horizontal", length=200, command=update_brightness)
+slider.pack()
+
+root.mainloop()
