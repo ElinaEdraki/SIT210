@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Linda Light Control</title>
+<style>
+body { font-family: sans-serif; max-width: 400px; margin: 60px auto; padding: 20px; }
+h1 { margin-bottom: 30px; }
+.card {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 2px solid #ddd; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px;
+}
+.card.on { border-color: #f5c542; background: #fffbea; }
+label { font-size: 1.1rem; font-weight: bold; }
+input[type=checkbox] { width: 24px; height: 24px; cursor: pointer; }
+#status { margin-top: 20px; padding: 12px; border-radius: 8px; background: #f0f0f0; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<h1>Linda's Light Control</h1>
+
+<div class="card" id="card-livingRoomOn">
+  <label for="livingRoomOn">Living Room</label>
+  <input type="checkbox" id="livingRoomOn" onchange="toggle('livingRoomOn', this.checked)"/>
+</div>
+
+<div class="card" id="card-bathroomOn">
+  <label for="bathroomOn">Bathroom</label>
+  <input type="checkbox" id="bathroomOn" onchange="toggle('bathroomOn', this.checked)"/>
+</div>
+
+<div class="card" id="card-closetOn">
+  <label for="closetOn">Closet</label>
+  <input type="checkbox" id="closetOn" onchange="toggle('closetOn', this.checked)"/>
+</div>
+
+<div id="status">Ready — toggle a light to begin.</div>
+
+<script>
+async function toggle(varName, value) {
+  document.getElementById("status").textContent = "Sending...";
+  try {
+    const res = await fetch("/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ var: varName, value: value })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById("card-" + varName).className = "card" + (value ? " on" : "");
+      document.getElementById("status").textContent = varName + " turned " + (value ? "ON ✓" : "OFF ✓");
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (e) {
+    document.getElementById("checkbox-" + varName);
+    document.getElementById(varName).checked = !value;
+    document.getElementById("status").textContent = "Error: " + e.message;
+  }
+}
+</script>
+</body>
+</html>
