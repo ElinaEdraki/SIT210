@@ -36,6 +36,11 @@ void onMessage(char* topic, byte* payload, unsigned int len) {
   String msg = "";
   for (int i = 0; i < len; i++) msg += (char)payload[i];
 
+  Serial.print("Topic: ");
+  Serial.print(topic);
+  Serial.print(" | Message: ");
+  Serial.println(msg);
+
   if (String(topic) == "ES/Wave") {
     digitalWrite(ledA, HIGH);
     digitalWrite(ledB, HIGH);
