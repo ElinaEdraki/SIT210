@@ -2,8 +2,8 @@ import tkinter as tk
 from gpiozero import LED
 
 living_room = LED(17)
-bathroom = LED(27)
 closet = LED(22)
+bathroom = LED(27)
 
 def update_leds():
     living_room.off()
