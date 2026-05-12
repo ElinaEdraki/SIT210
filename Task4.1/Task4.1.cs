@@ -49,13 +49,16 @@ void setup() {
 void loop() {
   uint16_t lux = lightMeter.readLightLevel();
 
-  motionDetected = (digitalRead(PIR_PIN) == HIGH);
-  if (motionDetected) lastMotionTime = millis();
-
+  if (pirFlag) {
+      pirFlag = false;
+      if (digitalRead(PIR_PIN) == HIGH) {
+          lastMotionTime = millis();
+      }
+  }
   if (millis() - lastMotionTime < MOTION_TIMEOUT) {
-    motionDetected = true;
+      motionDetected = true;
   } else {
-    motionDetected = false;
+      motionDetected = false;
   }
 
   if (switchFlag) {
